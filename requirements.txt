@@ -1,0 +1,10 @@
+streamlit
+torch
+torchvision
+numpy
+pandas
+rasterio
+matplotlib
+pyyaml
+plotly
+Pillow

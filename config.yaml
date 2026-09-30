@@ -1,0 +1,72 @@
+# ============================================================
+# SEN2NEON training configuration
+#
+# All paths are resolved relative to the current working directory
+# unless given as absolute paths. Any value here can be overridden
+# from the command line, e.g.:
+#
+#   python train.py --config config.yaml --model cnn --epochs 50
+#
+# ============================================================
+
+data:
+  data_root: "SEN2NEON_5GB"          # must contain patches/all_patches.csv
+  patch_index: null                  # default: <data_root>/patches/all_patches.csv
+  num_workers: 4
+  return_masks: true
+  max_train_samples: null            # debug: cap number of training patches
+  max_val_samples: null              # debug: cap number of validation patches
+
+model:
+  name: "hybrid"                     # cnn | transformer | hybrid
+  scale: 4
+
+  cnn:
+    features: 64
+    num_blocks: 8
+    residual_scale: 0.1
+
+  transformer:
+    embed_dim: 96
+    depth: 4
+    num_heads: 4
+    window_size: 8
+    dropout: 0.0
+
+  hybrid:
+    features: 64
+    transformer_dim: 64
+    cnn_blocks: 6
+    transformer_blocks: 4
+    heads: 4
+    window_size: 8
+
+training:
+  epochs: 100
+  batch_size: 8
+  lr: 0.0002
+  weight_decay: 0.00001
+  optimizer: "adamw"                 # adamw | adam | sgd
+  scheduler: "cosine"                # cosine | plateau | none
+  warmup_epochs: 3
+  grad_clip: 1.0
+  amp: true                          # mixed precision (CUDA only)
+  seed: 42
+  val_interval: 1                    # validate every N epochs
+  early_stopping_patience: 15        # epochs with no improvement; 0 disables
+  early_stopping_metric: "psnr_db"   # any key returned by calculate_all_metrics
+  higher_is_better: true             # true for psnr/ssim/spectral_correlation, false for mae/rmse/sam/ergas
+  log_interval: 20                   # batches between console log lines
+
+loss:
+  l1_weight: 1.0
+  charbonnier: true
+  charbonnier_eps: 0.001
+  sam_weight: 0.1
+  ssim_weight: 0.1
+  ssim_window: 11
+
+output:
+  output_dir: "runs/sen2neon"        # checkpoints/, logs/, history.csv written here
+  save_last: true
+  save_best: true
